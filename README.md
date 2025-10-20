@@ -51,7 +51,7 @@ npm run start
 Run the following command to build and package the backend services into a docker container
 
 ```shell
-mvn spring-boot:build-image
+mvn clean install -DskipTests
 ```
 
 The above command will build and package the services into a docker container and push it to your docker hub account.
