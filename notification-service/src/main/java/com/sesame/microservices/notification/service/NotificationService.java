@@ -39,7 +39,7 @@ public class NotificationService {
         };
         try {
             javaMailSender.send(messagePreparator);
-            log.info("Order Notifcation email sent!!");
+            log.info("Order Notification email sent!!");
         } catch (MailException e) {
             log.error("Exception occurred when sending mail", e);
             throw new RuntimeException("Exception occurred when sending mail to springshop@email.com", e);
