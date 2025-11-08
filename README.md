@@ -1,112 +1,97 @@
 # Spring Boot Microservices
-This repository contains the latest source code of the spring-boot-microservices tutorial
 
-You can watch the tutorial on Youtube [here](https://youtu.be/yn_stY3HCr8?si=EjrBEUl0P-bzSWRG)
+Ce dépôt contient le code source complet du projet **Spring Boot 3 Microservices**.
 
-## Services Overview
+## Services inclus
 
-- Product Service
-- Order Service
-- Inventory Service
-- Notification Service
-- API Gateway using Spring Cloud Gateway MVC
-- Shop Frontend using Angular 18
+* `product-service`
+* `order-service`
+* `inventory-service`
+* `notification-service`
+* `api-gateway` (Spring Cloud Gateway)
+* `discovery-service` (Eureka)
 
-## Tech Stack
+---
 
-The technologies used in this project are:
+## Technologies utilisées
 
-- Spring Boot
-- Angular
-- Mongo DB
-- MySQL
-- Kafka
-- Keycloak
-- Test Containers with Wiremock
-- Grafana Stack (Prometheus, Grafana, Loki and Tempo)
-- API Gateway using Spring Cloud Gateway MVC
-- Kubernetes
+* **Spring Boot 3**
+* **Spring Cloud**
+* **MySQL / MongoDB**
+* **Kafka**
+* **Keycloak**
+* **Testcontainers + WireMock**
+* **Grafana / Prometheus / Loki / Tempo**
+* **Angular 18** (frontend)
+* **Docker / Kubernetes**
 
+---
 
-## Application Architecture
-![image](./img.png) 
+## Architecture applicative
 
-## How to run the frontend application
+![Architecture](./img.png)
 
-Make sure you have the following installed on your machine:
+---
 
-- Node.js
-- NPM
-- Angular CLI
+## Lancer l’application frontend (facultatif)
 
-Run the following commands to start the frontend application
+Assure-toi d’avoir installé :
 
-```shell
+* Node.js
+* npm
+* Angular CLI
+
+Puis exécute :
+
+```bash
 cd frontend
 npm install
 npm run start
 ```
-## How to build the backend services
 
-Run the following command to build and package the backend services into a docker container
+---
 
-```shell
-mvn clean install -DskipTests
+## Builder les microservices backend
+
+### Étape 1 — Build des JARs
+
+```bash
+mvn clean package -DskipTests
 ```
 
-The above command will build and package the services into a docker container and push it to your docker hub account.
+Chaque service produira un JAR exécutable dans son dossier `target/`.
 
-## How to run the backend services
+Exemple :
+`api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar`
 
-Make sure you have the following installed on your machine:
+---
 
-- Java 21
-- Docker
-- Kind Cluster - https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+### Étape 2 — Construire les images Docker manuellement
 
-### Start Kind Cluster
-    
-Run the k8s/kind/create-kind-cluster.sh script to create the kind Kubernetes cluster
+Crée un fichier `Dockerfile` dans chaque dossier de service (ex: `api-gateway/`) :
 
-```shell
-./k8s/kind/create-kind-cluster.sh
-```
-This will create a kind cluster and pre-load all the required docker images into the cluster, this will save you time downloading the images when you deploy the application.
-
-### Deploy the infrastructure
-
-Run the k8s/manisfests/infrastructure.yaml file to deploy the infrastructure
-
-```shell
-kubectl apply -f k8s/manifests/infrastructure.yaml
+```dockerfile
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY target/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 ```
 
-### Deploy the services
+Puis exécute :
 
-Run the k8s/manifests/applications.yaml file to deploy the services
-
-```shell
-kubectl apply -f k8s/manifests/applications.yaml
+```bash
+cd api-gateway
+docker build -t <username>/api-gateway:latest .
 ```
 
-### Access the API Gateway
+Fais la même chose pour chaque service.
 
-To access the API Gateway, you need to port-forward the gateway service to your local machine
+---
 
-```shell
-kubectl port-forward svc/gateway-service 9000:9000
+### Étape 3 — Pousser sur Docker Hub
+
+```bash
+docker login
+docker push <username>/api-gateway:latest
 ```
-
-### Access the Keycloak Admin Console
-To access the Keycloak admin console, you need to port-forward the keycloak service to your local machine
-
-```shell
-kubectl port-forward svc/keycloak 8080:8080
-```
-
-### Access the Grafana Dashboards
-To access the Grafana dashboards, you need to port-forward the grafana service to your local machine
-
-```shell
-kubectl port-forward svc/grafana 3000:3000
-```
+Fais la même chose pour chaque service.
